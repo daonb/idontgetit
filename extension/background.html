@@ -1,0 +1,39 @@
+<script>
+var seltext = null;
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse)
+{
+	switch(request.message)
+	{
+		case 'setText':
+			window.seltext = request.data
+		break;
+
+		default:
+			sendResponse({data: 'Invalid arguments'});
+		break;
+	}
+});
+
+
+function savetext(info,tab)
+{
+	//alert("hello1" + tab.url);
+	var jax = new XMLHttpRequest();
+	jax.open("POST","http://idontgetit.appspot.com");
+	jax.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+	jax.send("url="+tab.url);
+	jax.onreadystatechange = function() { if(jax.readyState==4) { alert("hello2:" + tab.url/*jax.responseText*/);	}}
+}
+
+var contexts = ["selection"];
+for (var i = 0; i < contexts.length; i++)
+{
+	var context = contexts[i];
+	chrome.contextMenus.create({"title": "Didn't Get It", "contexts":[context], "onclick": savetext});
+}
+
+
+
+
+</script>
