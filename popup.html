@@ -1,0 +1,16 @@
+<html>
+  <body>
+  <div dir="rtl"  style="background-color:#ECD672;width: 100%"> 
+  {% for q in qs %}
+  <div class="question">
+  {{q.q}} <span class="credit">{{q.who}}</span>
+  <ul>
+    {% for a in q.answers %}
+      <li>{{a.a}} <span style="font-size:80%" class="credit">{{a.who}}</li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+  </div>
+  </body>
+</html>
+
