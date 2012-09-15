@@ -1,12 +1,14 @@
 # encoding: utf-8
-import cgi
-import urllib
-
+import jinja2
+import os
 from google.appengine.ext import ndb
 import webapp2
 from ndb_json import encode
 # from webapp2_extras import json
 from google.appengine.ext.webapp.util import run_wsgi_app
+
+jinja_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 class Answer(ndb.Model):
     when = ndb.DateTimeProperty(auto_now_add=True)
@@ -17,22 +19,21 @@ class WebPage(ndb.Model):
     url  = ndb.StringProperty()
     end_url  = ndb.StringProperty()
     title  = ndb.StringProperty()
-    id  = ndb.StringProperty()
 
 class Question(ndb.Model):
-    pages = ndb.StructuredProperty(WebPage, repeated = True)
     when = ndb.DateTimeProperty(auto_now_add=True)
     q = ndb.StringProperty()
     who = ndb.StringProperty()
-    answers = ndb.StructuredProperty(Answer, repeated=True)
     tag = ndb.StringProperty(repeated=True)
+    answers = ndb.StructuredProperty(Answer, repeated=True)
+    pages = ndb.StructuredProperty(WebPage, repeated = True)
 
 
 def load_fixture():
     tornado = WebPage(url="http://www.school.kotar.co.il/KotarApp/Viewer.aspx?nBookID=95056726#113.9392.4.fitwidth",
                 end_url="http://www.school.kotar.co.il/KotarApp/Viewer.aspx?nBookID=95056726#114.1870.4.fitwidth",
                 title="סופות טורנדו",
-                id = "dfdfdgfbghtr64ywvrercs",)
+                )
     tornado.put()
     q1 = Question(q="איפה זה האזור הממוזג?", who="קובי", answers = [
                         Answer(a="אנא עארף?", who="בניד"),
@@ -46,16 +47,19 @@ def load_fixture():
 
 class MainPage(webapp2.RequestHandler):
   def get(self):
-    self.response.headers['Content-Type'] = 'application/json'
-    '''
-    dthandler = lambda obj: obj.isoformat() if isinstance(obj,
-        datetime.datetime) else str(obj) if isinstance(obj, model.BlobKey)
-        else obj.id() if isinstance(obj, model.Key) else obj
-    '''
-    out = encode(Question.query())#, default=dthandler)
+    temp = jinja_env.get_template('popup.html')
+    # self.response.out.write(temp.render([a.to_dict for a in Question.query()]))
+    qs = []
+    for q in Question.query():
+        answers = []
+        for a in q.answers:
+            answers.append({"a": a.a, "who": a.who})
 
-    self.response.out.write(out)
+        qs.append({"q": q.q, "who": q.who,
+            "answers": answers,
+            })
 
+    self.response.out.write(temp.render({"qs": qs}))
 '''
 class SubmitForm(webapp.RequestHandler):
   def post(self):
