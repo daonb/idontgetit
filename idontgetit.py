@@ -15,7 +15,8 @@ jinja_env = jinja2.Environment(
 class MainPage(webapp2.RequestHandler):
   def get(self):
     context = []
-    qs =  Question.query(ancestor=fixture.first_page)
+    qs =  Question.query()
+    # import pdb; pdb.set_trace()
     # qs.map_async(lambda x: context.append())
 
     temp = jinja_env.get_template('popup.html')
