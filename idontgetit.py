@@ -2,8 +2,6 @@
 import jinja2
 import os
 import webapp2
-from ndb_json import encode
-# from webapp2_extras import json
 from google.appengine.ext.webapp.util import run_wsgi_app
 
 from models import Question, Answer
@@ -19,7 +17,7 @@ class MainPage(webapp2.RequestHandler):
     # import pdb; pdb.set_trace()
     # qs.map_async(lambda x: context.append())
 
-    temp = jinja_env.get_template('popup.html')
+    temp = jinja_env.get_template('templates/popup.html')
     self.response.out.write(temp.render({"qs": qs}))
 '''
 class SubmitForm(webapp.RequestHandler):
